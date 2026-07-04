@@ -1,0 +1,34 @@
+---
+description: มาตรฐาน security และ architecture สำหรับ Part 1 webapp
+globs: webapp/**
+alwaysApply: false
+---
+
+# Part 1 — Security & Architecture
+
+## Layering (บังคับ)
+```
+app/api/**/route.ts  →  HTTP layer เท่านั้น (validate input, return response)
+lib/services/**      →  business logic
+lib/repositories/**  →  data access (DB, file storage)
+lib/**               →  shared utils, types
+```
+
+- ห้าม god file — แยก concern ชัดเจน
+- Route handler ไม่ควรมี business logic ยาว ๆ
+
+## Security
+- Password: **bcrypt** hash (ห้าม plain text ใน DB)
+- Session: ใช้ httpOnly cookie (iron-session หรือ NextAuth)
+- API keys: อ่านจาก `process.env` เท่านั้น — ห้าม hardcode
+- File upload: validate MIME + extension + size limit
+- File path: sanitize ชื่อไฟล์ — ห้าม path traversal (`../`)
+- Input: validate ทุก API endpoint (zod แนะนำ)
+- CORS: จำกัด origin ถ้าแยก frontend/backend
+
+## Error Handling
+- Chat API: ต้องมี timeout + error message ที่ user เข้าใจได้
+- อย่า leak stack trace / API key ใน response
+
+## Mock User (ตาม spec)
+- username: `admin` / password: `admin123` (hash ก่อนเก็บ DB)

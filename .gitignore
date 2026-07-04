@@ -1,0 +1,9 @@
+node_modules/
+.env
+.env.local
+*.db
+data/
+webapp/.next/
+webapp/node_modules/
+.DS_Store
+STRUCTURE.md

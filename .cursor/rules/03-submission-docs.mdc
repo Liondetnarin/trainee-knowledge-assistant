@@ -1,0 +1,35 @@
+---
+description: รูปแบบเอกสารที่ต้องส่ง — README, AI_JOURNAL, DECISIONS
+globs: "{README.md,AI_JOURNAL.md,DECISIONS.md,docs/**}"
+alwaysApply: false
+---
+
+# Submission Documents
+
+## README.md (บังคับ)
+ต้องมี sections:
+- Tech Stack
+- Setup & Run (`docker compose up`)
+- Features Done (checkbox list)
+- Architecture (สั้น ๆ)
+- Known Issues (ซื่อสัตย์)
+
+## AI_JOURNAL.md (บังคับ — มีผลคะแนน Bonus)
+ทุก session ต้องมี:
+- **Prompt:** คำสั่งที่ใช้
+- **AI Response:** สรุปสั้น ๆ
+- **My Adjustment:** สิ่งที่เปลี่ยน/ตัดสินใจเอง (สำคัญมาก)
+
+เป้า: 15–30 sessions = 8 คะแนน (ideal)
+
+## DECISIONS.md (บังคับ)
+อธิบาย **3 decisions** สำคัญ (แต่ละข้อ 100–200 คำ):
+- Context
+- Alternatives Considered
+- Why [choice]
+- Trade-offs
+
+## Part 2–4 (docs/)
+- Part 2: วิดีโอ ≤3 นาที — ใช้ `docs/part-2-video-notes.md` เป็น bullet ไม่ใช่สคริปต์
+- Part 3: 500–1,000 คำ — week-by-week onboard plan
+- Part 4: 400–800 คำ — legacy thinking, มี priority + คำถามกลับ

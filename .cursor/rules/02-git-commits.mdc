@@ -1,0 +1,33 @@
+---
+description: มาตรฐาน Git commit สำหรับข้อสอบ
+alwaysApply: true
+---
+
+# Git Commit Standards
+
+## หลักการ
+- Commit **แยก logical unit** — 1 feature/fix ต่อ 1 commit
+- ห้าม commit ก้อนเดียวตอนจบ (ผู้ตรวจดู history)
+- เป้า: ≥10 commits ตลอด Part 1
+
+## Message Format
+```
+<type>(<scope>): <สรุปสั้น ๆ>
+
+<optional body — ทำไมถึงเปลี่ยน>
+```
+
+**Types:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
+
+## ตัวอย่าง
+```
+feat(auth): add login with bcrypt and iron-session
+
+feat(upload): validate PDF/TXT type and size limit
+
+feat(chat): add timeout and error handling for AI API
+```
+
+## ก่อน commit
+- ตรวจว่าไม่มี `.env`, API keys, credentials ใน diff
+- ตรวจว่า code รันได้หลัง commit นี้

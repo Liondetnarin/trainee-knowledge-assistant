@@ -1,0 +1,33 @@
+---
+description: กฎหลักข้อสอบ Junior Dev — ห้ามละเมิด
+alwaysApply: true
+---
+
+# Assignment Constraints
+
+## ห้ามเด็ดขาด
+- ให้คนอื่นทำแทน
+- Copy repo ของคนอื่นมาแปะชื่อตัวเอง
+- Submit repo ที่ทำไว้ก่อนได้รับโจทย์
+
+## อนุญาต
+- ใช้ AI (Cursor, ChatGPT, Claude, Copilot) ได้เต็มที่
+- ใช้ library / framework / template ได้ (ระบุใน README)
+- ถาม Google / Stack Overflow ได้
+
+## เป้าหมาย
+- ผ่านเกณฑ์: **≥110 / 180 คะแนน**
+- คุณภาพ > ปริมาณ — Part 1 Required Features ครบก่อน Bonus
+- ไม่จำเป็นต้องทำครบ 100% ทุก Part
+
+## Repo & การส่ง Part 1
+- GitHub public: `trainee-knowledge-assistant`
+- ต้องมี: `README.md`, `AI_JOURNAL.md`, `DECISIONS.md`
+- รันด้วย: `docker compose up` เดียวจบ
+
+## สิ่งที่ผู้ตรวจดู
+- Git commit history (แยกขั้นตอน ไม่ก้อนเดียว)
+- Code quality (layering, naming, ไม่มี god file)
+- Security basics (validation, ไม่ hardcode key)
+- AI Journal (Prompt + Response + My Adjustment)
+- วิธีคิด — ต้องอธิบายได้ใน live interview
