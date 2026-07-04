@@ -242,7 +242,7 @@ async function callChatCompletions(
         messages,
         temperature: 0.2,
         stream: false,
-        max_tokens: 1024,
+        max_tokens: 1536,
       }),
       signal: controller.signal,
     });
@@ -393,35 +393,69 @@ async function callAnthropic(
   }
 }
 
+function isTransientProviderError(error: unknown): boolean {
+  if (!(error instanceof AiProviderError)) return false;
+  const message = error.message.toLowerCase();
+  return (
+    error.status === 502 &&
+    (message.includes("unreadable") || message.includes("empty response"))
+  );
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function callProvider(
+  messages: AiMessage[],
+  provider: string,
+  model: string,
+  apiKey: string,
+): Promise<AiChatResult> {
+  if (provider === "anthropic") {
+    return callAnthropic(messages, model, apiKey);
+  }
+
+  if (provider === "openrouter") {
+    return callChatCompletions(
+      messages,
+      model,
+      apiKey,
+      "https://openrouter.ai/api/v1/chat/completions",
+      "openrouter",
+      {
+        "HTTP-Referer": process.env.APP_URL ?? "http://localhost:3000",
+        "X-OpenRouter-Title": "Knowledge Assistant",
+      },
+    );
+  }
+
+  return callChatCompletions(
+    messages,
+    model,
+    apiKey,
+    "https://api.openai.com/v1/chat/completions",
+    "openai",
+  );
+}
+
 export async function callAiChat(messages: AiMessage[]): Promise<AiChatResult> {
   const { apiKey, provider, model } = getAiConfig();
 
   try {
-    if (provider === "anthropic") {
-      return await callAnthropic(messages, model, apiKey);
-    }
+    try {
+      return await callProvider(messages, provider, model, apiKey);
+    } catch (error) {
+      if (!isTransientProviderError(error)) throw error;
 
-    if (provider === "openrouter") {
-      return await callChatCompletions(
-        messages,
+      console.warn("[ai] transient provider error, retrying once", {
+        provider,
         model,
-        apiKey,
-        "https://openrouter.ai/api/v1/chat/completions",
-        "openrouter",
-        {
-          "HTTP-Referer": process.env.APP_URL ?? "http://localhost:3000",
-          "X-OpenRouter-Title": "Knowledge Assistant",
-        },
-      );
+        error: error instanceof Error ? error.message : error,
+      });
+      await delay(500);
+      return await callProvider(messages, provider, model, apiKey);
     }
-
-    return await callChatCompletions(
-      messages,
-      model,
-      apiKey,
-      "https://api.openai.com/v1/chat/completions",
-      "openai",
-    );
   } catch (error) {
     if (error instanceof AiProviderError) {
       throw error;

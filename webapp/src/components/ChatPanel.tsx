@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 import {
   alertErrorClass,
   buttonPrimaryClass,
@@ -72,6 +72,17 @@ export function ChatPanel() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    await sendMessage();
+  }
+
+  function handleTextareaKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      void sendMessage();
+    }
+  }
+
+  async function sendMessage() {
     const message = input.trim();
     if (!message || loading) return;
 
@@ -251,10 +262,14 @@ export function ChatPanel() {
               rows={3}
               value={input}
               onChange={(event) => setInput(event.target.value)}
+              onKeyDown={handleTextareaKeyDown}
               placeholder="Type your question here..."
               className={`${inputClass} resize-none`}
               disabled={loading}
             />
+            <p className="mt-1.5 text-xs text-slate-400">
+              Press Enter to send, Shift+Enter for a new line.
+            </p>
           </div>
 
           {error ? (

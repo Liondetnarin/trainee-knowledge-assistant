@@ -44,11 +44,11 @@ export async function chatWithAi(
     }
 
     const allChunks = await getChunkTextsByDocumentId(input.documentId);
-    contextChunks = retrieveRelevantChunks(allChunks, input.message, 5);
+    contextChunks = retrieveRelevantChunks(allChunks, input.message, 3);
     usedDocument = true;
   }
 
-  const recentMessages = await getRecentMessages(userId, 10);
+  const recentMessages = await getRecentMessages(userId, 6);
   const aiMessages = [
     { role: "system" as const, content: buildSystemPrompt(contextChunks) },
     ...recentMessages.map((message) => ({
