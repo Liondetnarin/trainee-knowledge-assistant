@@ -27,6 +27,11 @@ function getSessionSecret(): string {
 
 let cachedOptions: SessionOptions | null = null;
 
+function useSecureCookies(): boolean {
+  const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+  return appUrl.startsWith("https://");
+}
+
 export function getSessionOptions(): SessionOptions {
   if (!cachedOptions) {
     cachedOptions = {
@@ -34,7 +39,8 @@ export function getSessionOptions(): SessionOptions {
       cookieName: "knowledge_assistant_session",
       cookieOptions: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        // Browsers omit Secure cookies on plain http://localhost unless APP_URL is https.
+        secure: useSecureCookies(),
         sameSite: "lax",
         maxAge: 60 * 60 * 24,
       },

@@ -30,7 +30,7 @@ export async function createDocument(
     createdAt: new Date(),
   };
 
-  await db.insert(documents).values(record);
+  db.insert(documents).values(record).run();
   return record;
 }
 
@@ -38,18 +38,19 @@ export async function saveDocumentChunks(chunks: ChunkInput[]): Promise<void> {
   if (chunks.length === 0) return;
 
   const db = getDb();
-  await db.insert(documentChunks).values(chunks);
+  db.insert(documentChunks).values(chunks).run();
 }
 
 export async function findDocumentById(
   documentId: string,
 ): Promise<DocumentRecord | undefined> {
   const db = getDb();
-  const rows = await db
+  const rows = db
     .select()
     .from(documents)
     .where(eq(documents.id, documentId))
-    .limit(1);
+    .limit(1)
+    .all();
 
   return rows[0];
 }
@@ -62,18 +63,20 @@ export async function findDocumentsByUserId(
     .select()
     .from(documents)
     .where(eq(documents.userId, userId))
-    .orderBy(desc(documents.createdAt));
+    .orderBy(desc(documents.createdAt))
+    .all();
 }
 
 export async function getChunkTextsByDocumentId(
   documentId: string,
 ): Promise<string[]> {
   const db = getDb();
-  const rows = await db
+  const rows = db
     .select({ content: documentChunks.content })
     .from(documentChunks)
     .where(eq(documentChunks.documentId, documentId))
-    .orderBy(documentChunks.chunkIndex);
+    .orderBy(documentChunks.chunkIndex)
+    .all();
 
   return rows.map((row) => row.content);
 }

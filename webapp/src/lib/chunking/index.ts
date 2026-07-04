@@ -26,11 +26,19 @@ export function splitText(
   return chunks;
 }
 
+const SUMMARY_HINT =
+  /(?:summarize|summary|สรุป|overview|tl;dr|main points|key points)/i;
+
 export function retrieveRelevantChunks(
   chunks: string[],
   query: string,
   topK = 3,
 ): string[] {
+  if (chunks.length === 0) return [];
+  if (SUMMARY_HINT.test(query)) {
+    return chunks.slice(0, topK);
+  }
+
   const terms = query
     .toLowerCase()
     .split(/\s+/)
@@ -46,6 +54,11 @@ export function retrieveRelevantChunks(
     );
     return { index, score, chunk };
   });
+
+  const bestScore = Math.max(...scored.map((entry) => entry.score));
+  if (bestScore === 0) {
+    return chunks.slice(0, topK);
+  }
 
   return scored
     .sort((a, b) => b.score - a.score)

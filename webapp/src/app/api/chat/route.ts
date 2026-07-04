@@ -29,8 +29,14 @@ export async function POST(request: Request) {
     const parsed = chatSchema.safeParse(body);
 
     if (!parsed.success) {
+      const issue = parsed.error.issues[0];
+      console.warn("[chat] validation failed", parsed.error.issues);
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "Invalid input" },
+        {
+          error: issue?.message ?? "Invalid input",
+          code: "VALIDATION_ERROR",
+          hint: "Check that your message is not empty and document selection is valid.",
+        },
         { status: 400 },
       );
     }
@@ -38,7 +44,21 @@ export async function POST(request: Request) {
     const result = await chatWithAi(parsed.data, session.userId);
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
+      const status =
+        result.status === 400 || result.status === 404 ? result.status : 502;
+      console.error("[chat] request failed", {
+        status,
+        error: result.error,
+        hint: result.hint,
+      });
+      return NextResponse.json(
+        {
+          error: result.error,
+          code: status === 400 || status === 404 ? "CLIENT_ERROR" : "AI_PROVIDER_ERROR",
+          hint: result.hint,
+        },
+        { status },
+      );
     }
 
     return NextResponse.json({

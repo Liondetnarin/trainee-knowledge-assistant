@@ -31,7 +31,7 @@ export async function createMessage(
     createdAt: new Date(),
   };
 
-  await db.insert(messages).values(record);
+  db.insert(messages).values(record).run();
   return record;
 }
 
@@ -43,17 +43,19 @@ export async function getMessagesByUserId(
     .select()
     .from(messages)
     .where(eq(messages.userId, userId))
-    .orderBy(messages.createdAt);
+    .orderBy(messages.createdAt)
+    .all();
 }
 
 export async function getSessionTokenTotal(userId: string): Promise<number> {
   const db = getDb();
-  const rows = await db
+  const rows = db
     .select({
       total: sql<number>`coalesce(sum(${messages.totalTokens}), 0)`,
     })
     .from(messages)
-    .where(eq(messages.userId, userId));
+    .where(eq(messages.userId, userId))
+    .all();
 
   return Number(rows[0]?.total ?? 0);
 }
@@ -63,12 +65,13 @@ export async function getRecentMessages(
   limit = 20,
 ): Promise<MessageRecord[]> {
   const db = getDb();
-  const rows = await db
+  const rows = db
     .select()
     .from(messages)
     .where(eq(messages.userId, userId))
     .orderBy(desc(messages.createdAt))
-    .limit(limit);
+    .limit(limit)
+    .all();
 
   return rows.reverse();
 }

@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import { mkdirSync, writeFileSync, existsSync } from "fs";
 import path from "path";
-import { PDFParse } from "pdf-parse";
+import { extractPdfText } from "@/lib/pdf/extract-text";
 import { splitText } from "@/lib/chunking";
 import {
   createDocument,
@@ -37,6 +37,28 @@ function getMaxUploadBytes(): number {
   return maxMb * 1024 * 1024;
 }
 
+function isAllowedMimeType(file: File, extension: string): boolean {
+  const mime = file.type.toLowerCase();
+
+  if (!mime || mime === "application/octet-stream") {
+    return true;
+  }
+
+  if (ALLOWED_MIME_TYPES.has(mime)) {
+    return true;
+  }
+
+  if (extension === ".pdf" && mime.includes("pdf")) {
+    return true;
+  }
+
+  if (extension === ".txt" && mime.startsWith("text/")) {
+    return true;
+  }
+
+  return false;
+}
+
 function validateFile(file: File): string | null {
   const extension = path.extname(file.name).toLowerCase();
 
@@ -44,7 +66,7 @@ function validateFile(file: File): string | null {
     return "Only PDF and TXT files are allowed";
   }
 
-  if (!ALLOWED_MIME_TYPES.has(file.type)) {
+  if (!isAllowedMimeType(file, extension)) {
     return "Invalid file type. Only PDF and TXT are allowed";
   }
 
@@ -59,18 +81,12 @@ function validateFile(file: File): string | null {
   return null;
 }
 
-async function extractText(buffer: Buffer, mimeType: string): Promise<string> {
-  if (mimeType === "text/plain") {
+async function extractText(buffer: Buffer, extension: string): Promise<string> {
+  if (extension === ".txt") {
     return buffer.toString("utf-8");
   }
 
-  const parser = new PDFParse({ data: buffer });
-  try {
-    const result = await parser.getText();
-    return result.text ?? "";
-  } finally {
-    await parser.destroy();
-  }
+  return extractPdfText(buffer);
 }
 
 export async function uploadDocument(
@@ -99,11 +115,24 @@ export async function uploadDocument(
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
+  const extension = path.extname(file.name).toLowerCase();
+
   let extractedText: string;
   try {
-    extractedText = await extractText(buffer, file.type);
-  } catch {
-    return { success: false, error: "Failed to extract text from file" };
+    extractedText = await extractText(buffer, extension);
+  } catch (error) {
+    console.error("[upload] text extraction failed", {
+      fileName: file.name,
+      extension,
+      error: error instanceof Error ? error.message : error,
+    });
+    return {
+      success: false,
+      error:
+        extension === ".pdf"
+          ? "Failed to read PDF. Use a text-based PDF (not a scanned image)."
+          : "Failed to extract text from file",
+    };
   }
 
   if (!extractedText.trim()) {

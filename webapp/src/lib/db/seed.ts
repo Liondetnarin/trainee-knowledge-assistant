@@ -24,5 +24,5 @@ export function seedAdminUser(db: BetterSQLite3Database<typeof schema>): void {
     username: MOCK_USERNAME,
     passwordHash,
     createdAt: new Date(),
-  });
+  }).run();
 }

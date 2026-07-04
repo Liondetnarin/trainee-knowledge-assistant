@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { retrieveRelevantChunks } from "@/lib/chunking";
-import { buildSystemPrompt, callAiChat } from "@/lib/ai/client";
+import { buildSystemPrompt, callAiChat, AiProviderError } from "@/lib/ai/client";
 import {
   findDocumentById,
   getChunkTextsByDocumentId,
@@ -22,7 +22,7 @@ export type ChatResult =
       sessionTotalTokens: number;
       usedDocument: boolean;
     }
-  | { success: false; error: string };
+  | { success: false; error: string; hint?: string; status?: number };
 
 export async function chatWithAi(
   input: ChatInput,
@@ -35,7 +35,12 @@ export async function chatWithAi(
     const document = await findDocumentById(input.documentId);
 
     if (!document || document.userId !== userId) {
-      return { success: false, error: "Document not found" };
+      return {
+        success: false,
+        error: "Document not found",
+        hint: "Upload a document first or pick another file from the dropdown.",
+        status: 404,
+      };
     }
 
     const allChunks = await getChunkTextsByDocumentId(input.documentId);
@@ -57,9 +62,24 @@ export async function chatWithAi(
   try {
     aiResult = await callAiChat(aiMessages);
   } catch (error) {
+    if (error instanceof AiProviderError) {
+      console.error("[chat] AI provider failed", {
+        message: error.message,
+        provider: error.provider,
+        status: error.status,
+      });
+      return {
+        success: false,
+        error: error.message,
+        hint: error.hint,
+        status: error.status,
+      };
+    }
+
     const message =
       error instanceof Error ? error.message : "Failed to get AI response";
-    return { success: false, error: message };
+    console.error("[chat] unexpected AI error", message);
+    return { success: false, error: message, status: 502 };
   }
 
   await createMessage({

@@ -2,6 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import {
+  alertErrorClass,
+  alertInfoClass,
+  buttonPrimaryClass,
+  inputClass,
+  labelClass,
+} from "@/components/ui/classes";
 
 export function LoginForm() {
   const router = useRouter();
@@ -39,9 +46,13 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className={alertInfoClass}>
+        Demo account: <strong>admin</strong> / <strong>admin123</strong>
+      </div>
+
       <div>
-        <label htmlFor="username" className="text-gray-500 mb-1 block text-sm font-medium">
+        <label htmlFor="username" className={labelClass}>
           Username
         </label>
         <input
@@ -49,14 +60,14 @@ export function LoginForm() {
           type="text"
           value={username}
           onChange={(event) => setUsername(event.target.value)}
-          className="w-full rounded-md border px-3 py-2 text-sm"
+          className={inputClass}
           autoComplete="username"
           required
         />
       </div>
 
       <div>
-        <label htmlFor="password" className="text-gray-500 mb-1 block text-sm font-medium">
+        <label htmlFor="password" className={labelClass}>
           Password
         </label>
         <input
@@ -64,19 +75,15 @@ export function LoginForm() {
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="w-full rounded-md border px-3 py-2 text-sm"
+          className={inputClass}
           autoComplete="current-password"
           required
         />
       </div>
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className={alertErrorClass}>{error}</p> : null}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
-      >
+      <button type="submit" disabled={loading} className={`${buttonPrimaryClass} w-full`}>
         {loading ? "Signing in..." : "Sign in"}
       </button>
     </form>
