@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import { DragEvent, FormEvent, useEffect, useState } from "react";
 import {
   alertErrorClass,
   alertSuccessClass,
@@ -24,6 +24,12 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+// The native file picker's `accept` attribute filters what's selectable, but
+// drag-and-drop bypasses it entirely — so dropped files need the same check.
+function isSupportedFile(file: File): boolean {
+  return /\.(pdf|txt)$/i.test(file.name);
+}
+
 export function UploadForm() {
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [file, setFile] = useState<File | null>(null);
@@ -32,6 +38,7 @@ export function UploadForm() {
   const [loading, setLoading] = useState(false);
   const [inputKey, setInputKey] = useState(0);
   const [deletingId, setDeletingId] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
 
   async function loadDocuments() {
     const response = await fetch("/api/documents");
@@ -46,6 +53,34 @@ export function UploadForm() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadDocuments();
   }, []);
+
+  function handleDragOver(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setIsDragging(true);
+  }
+
+  function handleDragLeave(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setIsDragging(false);
+  }
+
+  function handleDrop(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setIsDragging(false);
+
+    const dropped = event.dataTransfer.files?.[0];
+    if (!dropped) return;
+
+    setSuccess("");
+
+    if (!isSupportedFile(dropped)) {
+      setError("Only PDF and TXT files are allowed");
+      return;
+    }
+
+    setError("");
+    setFile(dropped);
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -137,7 +172,14 @@ export function UploadForm() {
           </label>
           <label
             htmlFor="file"
-            className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center transition hover:border-blue-400 hover:bg-blue-50/40"
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-8 text-center transition ${
+              isDragging
+                ? "border-blue-500 bg-blue-50"
+                : "border-slate-300 bg-slate-50 hover:border-blue-400 hover:bg-blue-50/40"
+            }`}
           >
             <span className="text-sm font-medium text-slate-800">
               {file ? file.name : "Click to browse or drop a file here"}
