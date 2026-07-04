@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
+import { logout } from "@/lib/services/auth.service";
 
-// TODO: implement logout
 export async function POST() {
-  return NextResponse.json(
-    { error: "Not implemented yet" },
-    { status: 501 },
-  );
+  try {
+    await logout();
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Logout failed";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
