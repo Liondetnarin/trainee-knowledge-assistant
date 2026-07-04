@@ -38,6 +38,6 @@
 | ไฟล์ | Done |
 |------|:----:|
 | README.md | [x] |
-| AI_JOURNAL.md (15+ sessions) | [ ] (ตอนนี้ 5) |
+| AI_JOURNAL.md (15+ sessions) | [ ] (ตอนนี้ 8) |
 | DECISIONS.md (3 decisions) | [x] |
 | docker compose up รันได้ | [x] |
