@@ -29,14 +29,28 @@ export const documentChunks = sqliteTable("document_chunks", {
   content: text("content").notNull(),
 });
 
+export const conversations = sqliteTable("conversations", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  title: text("title").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
 export const messages = sqliteTable("messages", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
     .references(() => users.id),
+  conversationId: text("conversation_id")
+    .notNull()
+    .references(() => conversations.id),
   role: text("role").notNull(),
   content: text("content").notNull(),
   documentId: text("document_id").references(() => documents.id),
+  citation: text("citation"),
   promptTokens: integer("prompt_tokens").notNull().default(0),
   completionTokens: integer("completion_tokens").notNull().default(0),
   totalTokens: integer("total_tokens").notNull().default(0),

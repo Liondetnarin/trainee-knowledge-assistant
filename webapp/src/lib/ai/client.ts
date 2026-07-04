@@ -58,11 +58,34 @@ function getAiConfig() {
   };
 }
 
+interface ProviderEndpoint {
+  url: string;
+  headers: Record<string, string>;
+}
+
+/**
+ * OpenAI-compatible chat/completions endpoints per provider.
+ * Groq and Gemini both expose OpenAI-compatible APIs with generous free tiers.
+ */
+function getProviderEndpoint(provider: string): ProviderEndpoint {
+  switch (provider) {
+    case "groq":
+      return { url: "https://api.groq.com/openai/v1/chat/completions", headers: {} };
+    case "gemini":
+      return {
+        url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+        headers: {},
+      };
+    default:
+      return { url: "https://api.openai.com/v1/chat/completions", headers: {} };
+  }
+}
+
 function getErrorHint(message: string, provider: string, model: string): string {
   const lower = message.toLowerCase();
 
   if (lower.includes("provider returned error")) {
-    return `OpenRouter could not reach the model "${model}". Check AI_MODEL at openrouter.ai/models, account credits, and rate limits. Try e.g. openai/gpt-4o-mini or a :free model.`;
+    return `The "${provider}" API could not reach model "${model}". Check AI_MODEL and your account's rate limits/credits, or switch AI_PROVIDER.`;
   }
 
   if (
@@ -71,19 +94,19 @@ function getErrorHint(message: string, provider: string, model: string): string 
     lower.includes("request limit") ||
     lower.includes("429")
   ) {
-    return `Model "${model}" is temporarily overloaded or rate-limited. Wait a few minutes, or switch AI_MODEL to a paid model like openai/gpt-4o-mini.`;
+    return `Model "${model}" is temporarily overloaded or rate-limited. Wait a few minutes, or switch to a different AI_MODEL/AI_PROVIDER.`;
   }
 
   if (lower.includes("invalid api key") || lower.includes("unauthorized")) {
-    return `Check AI_API_KEY for provider "${provider}". OpenRouter keys start with sk-or-v1-.`;
+    return `Check AI_API_KEY for provider "${provider}" — make sure it matches AI_PROVIDER (e.g. a Groq key for provider=groq).`;
   }
 
   if (lower.includes("model") && lower.includes("not found")) {
-    return `Model "${model}" was not found. Use a full OpenRouter slug like openai/gpt-4o-mini.`;
+    return `Model "${model}" was not found for provider "${provider}". Check the exact model id in that provider's docs.`;
   }
 
   if (lower.includes("insufficient") || lower.includes("credit") || lower.includes("balance")) {
-    return "Your AI provider account may be out of credits. Top up or switch to a free model.";
+    return "Your AI provider account may be out of credits. Top up or switch to a free-tier model.";
   }
 
   return `Verify AI_PROVIDER, AI_MODEL, and AI_API_KEY in .env, then restart Docker.`;
@@ -416,26 +439,37 @@ async function callProvider(
     return callAnthropic(messages, model, apiKey);
   }
 
-  if (provider === "openrouter") {
-    return callChatCompletions(
-      messages,
-      model,
-      apiKey,
-      "https://openrouter.ai/api/v1/chat/completions",
-      "openrouter",
-      {
-        "HTTP-Referer": process.env.APP_URL ?? "http://localhost:3000",
-        "X-OpenRouter-Title": "Knowledge Assistant",
-      },
-    );
-  }
-
+  const endpoint = getProviderEndpoint(provider);
   return callChatCompletions(
     messages,
     model,
     apiKey,
-    "https://api.openai.com/v1/chat/completions",
-    "openai",
+    endpoint.url,
+    provider,
+    endpoint.headers,
+  );
+}
+
+function toProviderError(error: unknown, provider: string, model: string): AiProviderError {
+  if (error instanceof AiProviderError) {
+    return error;
+  }
+
+  if (error instanceof Error && error.name === "AbortError") {
+    return new AiProviderError("AI request timed out. Please try again.", {
+      status: 504,
+      provider,
+      hint: "The model took too long. Try a shorter message or different model.",
+    });
+  }
+
+  return new AiProviderError(
+    error instanceof Error ? error.message : "Failed to reach AI provider",
+    {
+      status: 502,
+      provider,
+      hint: getErrorHint("", provider, model),
+    },
   );
 }
 
@@ -457,36 +491,230 @@ export async function callAiChat(messages: AiMessage[]): Promise<AiChatResult> {
       return await callProvider(messages, provider, model, apiKey);
     }
   } catch (error) {
-    if (error instanceof AiProviderError) {
-      throw error;
-    }
-
-    if (error instanceof Error && error.name === "AbortError") {
-      throw new AiProviderError("AI request timed out. Please try again.", {
-        status: 504,
-        provider,
-        hint: "The model took too long. Try a shorter message or different model.",
-      });
-    }
-
-    throw new AiProviderError(
-      error instanceof Error ? error.message : "Failed to reach AI provider",
-      {
-        status: 502,
-        provider,
-        hint: getErrorHint("", provider, model),
-      },
-    );
+    throw toProviderError(error, provider, model);
   }
 }
 
-export function buildSystemPrompt(contextChunks: string[]): string {
+function estimateTokens(text: string): number {
+  return Math.max(1, Math.ceil(text.length / 4));
+}
+
+async function streamChatCompletions(
+  messages: AiMessage[],
+  model: string,
+  apiKey: string,
+  provider: string,
+  onDelta: (text: string) => void,
+): Promise<AiChatResult> {
+  const endpoint = getProviderEndpoint(provider);
+  const controller = new AbortController();
+  let timeout = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+  const resetTimeout = () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+  };
+
+  try {
+    const response = await fetch(endpoint.url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        ...endpoint.headers,
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.2,
+        stream: true,
+        stream_options: { include_usage: true },
+        max_tokens: 1536,
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok || !response.body) {
+      let data: ApiErrorBody = {};
+      try {
+        data = (await parseJsonResponse(response)) as ApiErrorBody;
+      } catch {
+        // fall through with generic error body
+      }
+      console.error("[ai] stream provider error", {
+        provider,
+        model,
+        status: response.status,
+        error: data.error,
+      });
+      throw formatProviderError(data, response.status || 502, provider, model);
+    }
+
+    const decoder = new TextDecoder();
+    const reader = response.body.getReader();
+    let buffer = "";
+    let content = "";
+    let reasoningText = "";
+    let usage: TokenUsage | null = null;
+
+    // Deltas must keep leading/trailing spaces — do NOT reuse the trimming
+    // extractMessageContent here or words get glued together.
+    const extractDeltaText = (delta: Record<string, unknown> | undefined): string => {
+      if (!delta) return "";
+      const deltaContent = delta.content;
+      if (typeof deltaContent === "string") return deltaContent;
+      if (Array.isArray(deltaContent)) {
+        return deltaContent.map((part) => readContentPart(part).text).join("");
+      }
+      return "";
+    };
+
+    const handleLine = (line: string) => {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith("data:")) return;
+
+      const payload = trimmed.slice(5).trim();
+      if (!payload || payload === "[DONE]") return;
+
+      let parsed: {
+        choices?: Array<{ delta?: Record<string, unknown> }>;
+        usage?: {
+          prompt_tokens?: number;
+          completion_tokens?: number;
+          total_tokens?: number;
+        };
+        error?: { message?: string };
+      };
+      try {
+        parsed = JSON.parse(payload) as typeof parsed;
+      } catch {
+        return; // ignore malformed keep-alive chunks
+      }
+
+      if (parsed.error?.message) {
+        throw formatProviderError(parsed as ApiErrorBody, 502, provider, model);
+      }
+
+      if (parsed.usage && typeof parsed.usage.total_tokens === "number") {
+        usage = {
+          promptTokens: parsed.usage.prompt_tokens ?? 0,
+          completionTokens: parsed.usage.completion_tokens ?? 0,
+          totalTokens: parsed.usage.total_tokens ?? 0,
+        };
+      }
+
+      const delta = parsed.choices?.[0]?.delta;
+      const piece = extractDeltaText(delta);
+      if (piece) {
+        content += piece;
+        onDelta(piece);
+      }
+
+      // Reasoning models may put text here; keep as fallback only.
+      if (typeof delta?.reasoning === "string") {
+        reasoningText += delta.reasoning;
+      } else if (typeof delta?.reasoning_content === "string") {
+        reasoningText += delta.reasoning_content;
+      }
+    };
+
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      resetTimeout();
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
+        handleLine(line);
+      }
+    }
+    if (buffer) handleLine(buffer);
+
+    if (!content.trim() && reasoningText.trim()) {
+      content = reasoningText.trim();
+      onDelta(content);
+    }
+
+    if (!content.trim()) {
+      throw new AiProviderError("AI returned an empty response", {
+        status: 502,
+        provider,
+        hint: "Try again or switch to another model.",
+      });
+    }
+
+    // Some free models omit usage in streaming — estimate so the token counter keeps working.
+    if (!usage) {
+      const promptTokens = estimateTokens(messages.map((m) => m.content).join("\n"));
+      const completionTokens = estimateTokens(content);
+      usage = {
+        promptTokens,
+        completionTokens,
+        totalTokens: promptTokens + completionTokens,
+      };
+    }
+
+    return { content, usage };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+/**
+ * Streams the assistant reply via onDelta and resolves with the full result.
+ * Anthropic falls back to a single non-streamed delta; retries once only if
+ * nothing was streamed yet (safe — the client saw no partial output).
+ */
+export async function callAiChatStream(
+  messages: AiMessage[],
+  onDelta: (text: string) => void,
+): Promise<AiChatResult> {
+  const { apiKey, provider, model } = getAiConfig();
+
+  if (provider === "anthropic") {
+    const result = await callAiChat(messages);
+    onDelta(result.content);
+    return result;
+  }
+
+  let deltasSent = false;
+  const trackDelta = (text: string) => {
+    deltasSent = true;
+    onDelta(text);
+  };
+
+  try {
+    try {
+      return await streamChatCompletions(messages, model, apiKey, provider, trackDelta);
+    } catch (error) {
+      if (deltasSent || !isTransientProviderError(error)) throw error;
+
+      console.warn("[ai] transient stream error, retrying once", {
+        provider,
+        model,
+        error: error instanceof Error ? error.message : error,
+      });
+      await delay(500);
+      return await streamChatCompletions(messages, model, apiKey, provider, trackDelta);
+    }
+  } catch (error) {
+    throw toProviderError(error, provider, model);
+  }
+}
+
+export interface ContextChunk {
+  index: number;
+  chunk: string;
+}
+
+export function buildSystemPrompt(contextChunks: ContextChunk[]): string {
   if (contextChunks.length === 0) {
     return "You are a helpful knowledge assistant. Answer clearly and concisely.";
   }
 
   const context = contextChunks
-    .map((chunk, index) => `[Chunk ${index + 1}]\n${chunk}`)
+    .map(({ index, chunk }) => `[Chunk ${index + 1}]\n${chunk}`)
     .join("\n\n");
 
   return [

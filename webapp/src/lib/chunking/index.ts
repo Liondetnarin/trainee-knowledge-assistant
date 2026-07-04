@@ -29,14 +29,27 @@ export function splitText(
 const SUMMARY_HINT =
   /(?:summarize|summary|สรุป|overview|tl;dr|main points|key points)/i;
 
+export interface RetrievedChunk {
+  index: number;
+  chunk: string;
+}
+
+/**
+ * Returns chunk index alongside text so callers can cite which part of the
+ * document an answer came from (used for the citation footer in chat).
+ */
 export function retrieveRelevantChunks(
   chunks: string[],
   query: string,
   topK = 3,
-): string[] {
+): RetrievedChunk[] {
   if (chunks.length === 0) return [];
+
+  const toResult = (indices: number[]): RetrievedChunk[] =>
+    indices.map((index) => ({ index, chunk: chunks[index] }));
+
   if (SUMMARY_HINT.test(query)) {
-    return chunks.slice(0, topK);
+    return toResult(chunks.slice(0, topK).map((_, index) => index));
   }
 
   const terms = query
@@ -44,7 +57,9 @@ export function retrieveRelevantChunks(
     .split(/\s+/)
     .filter((t) => t.length > 2);
 
-  if (terms.length === 0) return chunks.slice(0, topK);
+  if (terms.length === 0) {
+    return toResult(chunks.slice(0, topK).map((_, index) => index));
+  }
 
   const scored = chunks.map((chunk, index) => {
     const lower = chunk.toLowerCase();
@@ -57,11 +72,12 @@ export function retrieveRelevantChunks(
 
   const bestScore = Math.max(...scored.map((entry) => entry.score));
   if (bestScore === 0) {
-    return chunks.slice(0, topK);
+    return toResult(chunks.slice(0, topK).map((_, index) => index));
   }
 
   return scored
     .sort((a, b) => b.score - a.score)
     .slice(0, topK)
-    .map((s) => s.chunk);
+    .sort((a, b) => a.index - b.index)
+    .map((s) => ({ index: s.index, chunk: s.chunk }));
 }
