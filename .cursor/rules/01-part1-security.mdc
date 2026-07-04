@@ -30,5 +30,5 @@ lib/**               →  shared utils, types
 - Chat API: ต้องมี timeout + error message ที่ user เข้าใจได้
 - อย่า leak stack trace / API key ใน response
 
-## Mock User (ตาม spec)
-- username: `admin` / password: `admin123` (hash ก่อนเก็บ DB)
+## Mock Users (ตาม spec — รองรับหลาย user เพื่อ demo)
+- username: `admin1`–`admin4` / password: `admin123` (hash ก่อนเก็บ DB)

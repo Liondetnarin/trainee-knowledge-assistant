@@ -4,25 +4,29 @@ import { eq } from "drizzle-orm";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import * as schema from "./schema";
 
-const MOCK_USERNAME = "admin";
+const MOCK_USERNAMES = ["admin1", "admin2", "admin3", "admin4"];
 const MOCK_PASSWORD = "admin123";
 
-export function seedAdminUser(db: BetterSQLite3Database<typeof schema>): void {
-  const existing = db
-    .select({ id: schema.users.id })
-    .from(schema.users)
-    .where(eq(schema.users.username, MOCK_USERNAME))
-    .limit(1)
-    .get();
+export function seedMockUsers(db: BetterSQLite3Database<typeof schema>): void {
+  for (const username of MOCK_USERNAMES) {
+    const existing = db
+      .select({ id: schema.users.id })
+      .from(schema.users)
+      .where(eq(schema.users.username, username))
+      .limit(1)
+      .get();
 
-  if (existing) return;
+    if (existing) continue;
 
-  const passwordHash = bcrypt.hashSync(MOCK_PASSWORD, 10);
+    const passwordHash = bcrypt.hashSync(MOCK_PASSWORD, 10);
 
-  db.insert(schema.users).values({
-    id: randomUUID(),
-    username: MOCK_USERNAME,
-    passwordHash,
-    createdAt: new Date(),
-  }).run();
+    db.insert(schema.users)
+      .values({
+        id: randomUUID(),
+        username,
+        passwordHash,
+        createdAt: new Date(),
+      })
+      .run();
+  }
 }

@@ -3,7 +3,7 @@ import { drizzle, type BetterSQLite3Database } from "drizzle-orm/better-sqlite3"
 import { existsSync, mkdirSync } from "fs";
 import path, { dirname } from "path";
 import * as schema from "./schema";
-import { seedAdminUser } from "./seed";
+import { seedMockUsers } from "./seed";
 
 let dbInstance: BetterSQLite3Database<typeof schema> | null = null;
 
@@ -70,7 +70,7 @@ export function getDb(): BetterSQLite3Database<typeof schema> {
   initTables(sqlite);
 
   dbInstance = drizzle(sqlite, { schema });
-  seedAdminUser(dbInstance);
+  seedMockUsers(dbInstance);
 
   return dbInstance;
 }

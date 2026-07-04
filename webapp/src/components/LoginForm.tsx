@@ -12,7 +12,7 @@ import {
 
 export function LoginForm() {
   const router = useRouter();
-  const [username, setUsername] = useState("admin");
+  const [username, setUsername] = useState("admin1");
   const [password, setPassword] = useState("admin123");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,7 +48,8 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className={alertInfoClass}>
-        Demo account: <strong>admin</strong> / <strong>admin123</strong>
+        Demo accounts: <strong>admin1</strong>–<strong>admin4</strong> / password{" "}
+        <strong>admin123</strong>
       </div>
 
       <div>
