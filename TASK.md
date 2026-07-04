@@ -2,25 +2,20 @@
 
 > อัปเดตทุกครั้งที่จบ task — ดู `.cursor/skills/part-1-webapp/feature-checklist.md` สำหรับรายละเอียด Part 1
 
-## Timeline
-- เริ่ม: _ใส่วันที่_
-- Deadline: _ใส่วันที่ (+2 วัน)_
-- สถานะรวม: 🔴 ยังไม่เริ่ม
-
----
+## สถานะรวม: 🟡 กำลังทำ Part 1 Required
 
 ## Part 1 — Coding (เป้า ~45–55 / 65)
 
 ### Required (ต้องครบ)
-- [ ] Login + Protected Routes
-- [ ] Upload PDF/TXT
-- [ ] Chat AI basic
-- [ ] Chat + File Context
-- [ ] Token Usage Counter
+- [x] Login + Protected Routes
+- [x] Upload PDF/TXT
+- [x] Chat AI basic
+- [x] Chat + File Context
+- [x] Token Usage Counter
 
 ### Infrastructure
-- [ ] `docker compose up` รันได้
-- [ ] `/api/health` healthcheck
+- [x] `docker compose up` รันได้
+- [x] `/api/health` healthcheck
 - [ ] Git ≥10 commits แยก feature
 
 ### Deliverables

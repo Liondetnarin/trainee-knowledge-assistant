@@ -31,12 +31,12 @@ docker compose up --build
 
 ## Features Done
 
-- [ ] Login + Protected Routes
-- [ ] File Upload (PDF/TXT)
-- [ ] Chat with AI
-- [ ] Chat with Uploaded File Context
-- [ ] Token Usage Counter
-- [ ] Docker Compose + Healthcheck
+- [x] Login + Protected Routes
+- [x] File Upload (PDF/TXT)
+- [x] Chat with AI
+- [x] Chat with Uploaded File Context
+- [x] Token Usage Counter
+- [x] Docker Compose + Healthcheck
 
 ## Architecture
 

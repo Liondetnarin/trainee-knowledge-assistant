@@ -4,11 +4,11 @@
 
 | # | Feature | คะแนน | Done | เกณฑ์เต็ม |
 |---|---------|------:|:----:|-----------|
-| 1 | Login + Protected Routes | 5 | [ ] | bcrypt + session mgmt |
-| 2 | Upload PDF/TXT | 5 | [ ] | validate type/size + sanitize path |
-| 3 | Chat AI basic | 5 | [ ] | error handling + timeout |
-| 4 | Chat + File Context | 10 | [ ] | แม่นยำพอใช้ + handle ไฟล์ใหญ่ |
-| 5 | Token Usage Counter | 5 | [ ] | per message + session total |
+| 1 | Login + Protected Routes | 5 | [x] | bcrypt + session mgmt |
+| 2 | Upload PDF/TXT | 5 | [x] | validate type/size + sanitize path |
+| 3 | Chat AI basic | 5 | [x] | error handling + timeout |
+| 4 | Chat + File Context | 10 | [x] | แม่นยำพอใช้ + handle ไฟล์ใหญ่ |
+| 5 | Token Usage Counter | 5 | [x] | per message + session total |
 
 ## Bonus (cap 20 — เลือกทำ)
 
@@ -20,7 +20,7 @@
 | D | RAG + Vector DB | 8 | [ ] | ต่ำ (ใช้เวลามาก) |
 | E | Conversation history | 3 | [ ] | กลาง |
 | F | Rate limiting | 3 | [ ] | ต่ำ |
-| G | Docker + Healthcheck | 3 | [ ] | สูง (ทำตั้งแต่แรก) |
+| G | Docker + Healthcheck | 3 | [x] | สูง (ทำตั้งแต่แรก) |
 | H | Unit tests ≥40% | 5 | [ ] | ต่ำ |
 
 ## Code Quality (15 คะแนน)
