@@ -55,6 +55,26 @@
 
 ---
 
+## Session 6: Bug — login พังทั้งระบบหลัง deploy จริง (`no such column: conversation_id`)
+
+**Prompt:** ส่ง error log จาก browser console ตรงๆ: `POST /api/auth/login 500 — no such column: conversation_id`
+
+**AI Response:** วินิจฉัยว่า Docker volume (`app-data`) ที่รันอยู่ก่อนหน้ามีตาราง `messages` แบบ schema เก่า (ไม่มีคอลัมน์ `conversation_id`) จาก session ก่อนที่เพิ่ง migrate — `CREATE TABLE IF NOT EXISTS` ไม่เพิ่ม column ให้ตารางที่มีอยู่แล้ว ทำให้ `CREATE INDEX ... ON messages(conversation_id)` พังตั้งแต่ตอน `getDb()` เริ่มทำงาน กระทบทุก request รวมถึง login แก้โดยเพิ่ม self-healing migration ใน `db/index.ts` — เช็คก่อนว่า `messages` table เป็น schema เก่าไหม (ไม่มีคอลัมน์ `conversation_id`) ถ้าใช่ให้ `DROP TABLE` แล้วปล่อยให้ `CREATE TABLE IF NOT EXISTS` สร้างใหม่ตาม schema ปัจจุบัน
+
+**My Adjustment:** ก่อนสรุปว่าแก้ถูก จำลอง database แบบ schema เก่าขึ้นมาจริง (เขียน script สร้างตาราง `messages` แบบไม่มี `conversation_id`) แล้วรัน dev server ทับเพื่อพิสูจน์ว่า migration ทำงานจริงและ login/chat ผ่านได้ — ไม่ใช่แค่เชื่อ diagnosis เฉยๆ
+
+---
+
+## Session 7: ตรวจสอบงานที่ทำไป + แก้บั๊กเล็กน้อย + คำถามเรื่องการส่งงาน
+
+**Prompt:** (1) ให้แสดงชื่อไฟล์เอกสารในข้อความ hint แทนคำว่า "sidebar" เฉยๆ, (2) ถามว่าหน้า /upload ยังจำเป็นไหม, (3) ให้ตรวจ TASK.md เทียบกับสถานะจริงและหา bug, (4) ถามว่ามี bonus อะไรจากเอกสารโจทย์ที่ยังทำได้อีก, (5) ถามเรื่องการส่ง `.env` ให้ผู้ตรวจหรือไม่
+
+**AI Response:** เพิ่ม callback `onDocumentsChange` ใน `DocumentSidebar` ให้ `ChatPanel` รู้จักชื่อไฟล์ที่เลือกอยู่ (ไม่ใช่แค่ id), แก้ให้ sidebar sync ลำดับแชทหลังทุกข้อความ (เดิม refresh แค่ข้อความแรก), เจอและลบ `getMessagesByConversationId` ที่เป็น dead code ไม่มีใครเรียกใช้ในระหว่างตรวจโค้ด, ยืนยันว่านับ commit ได้ 20 (ผ่านเกณฑ์ ≥10 แล้ว), และอธิบายว่าหน้า `/upload` ยังจำเป็นเพราะ spec ระบุ "Upload Page" เป็นหนึ่งใน 3 หน้าหลักที่ต้องมี (ไม่ใช่แค่ฟีเจอร์อัปโหลด) จึงแนะนำเก็บไว้แทนลบ
+
+**My Adjustment:** ตรวจ usage ของทุก export ใน repository ด้วย `grep` จริงก่อนตัดสินใจลบ dead code แทนการเดา, ปฏิเสธคำแนะนำ (ที่อาจดูสมเหตุผล) ที่จะลบหน้า /upload เพราะขัดกับ required feature ของโจทย์ตรงๆ — เลือกทำตาม spec แทนตาม UX ที่ดูสวยกว่า
+
+---
+
 <!-- คัดลอก template ด้านล่างสำหรับ session ถัดไป -->
 
 ## Session N: _(ชื่อ task)_

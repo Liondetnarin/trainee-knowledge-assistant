@@ -2,7 +2,7 @@
 
 > อัปเดตทุกครั้งที่จบ task — ดู `.cursor/skills/part-1-webapp/feature-checklist.md` สำหรับรายละเอียด Part 1
 
-## สถานะรวม: 🟡 กำลังทำ Part 1 Required
+## สถานะรวม: 🟢 Part 1 Required + Infra + Deliverables ครบ — เหลือ AI_JOURNAL sessions กับ Part 2-4
 
 ## Part 1 — Coding (เป้า ~45–55 / 65)
 
@@ -16,11 +16,11 @@
 ### Infrastructure
 - [x] `docker compose up` รันได้
 - [x] `/api/health` healthcheck
-- [ ] Git ≥10 commits แยก feature (ต้องจัด commit งาน refactor รอบนี้ให้เป็นก้อนตาม feature)
+- [x] Git ≥10 commits แยก feature (20 commits ทั้งหมด)
 
 ### Deliverables
 - [x] README.md
-- [ ] AI_JOURNAL.md (เป้า 15+ sessions — ตอนนี้ 5)
+- [ ] AI_JOURNAL.md (เป้า 15+ sessions — ตอนนี้ 7)
 - [x] DECISIONS.md (3 decisions)
 
 ### Bonus (ถ้ามีเวลา)
