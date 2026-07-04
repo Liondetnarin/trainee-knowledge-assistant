@@ -27,7 +27,7 @@ function getSessionSecret(): string {
 
 let cachedOptions: SessionOptions | null = null;
 
-function useSecureCookies(): boolean {
+function isHttpsDeployment(): boolean {
   const appUrl = process.env.APP_URL ?? "http://localhost:3000";
   return appUrl.startsWith("https://");
 }
@@ -40,7 +40,7 @@ export function getSessionOptions(): SessionOptions {
       cookieOptions: {
         httpOnly: true,
         // Browsers omit Secure cookies on plain http://localhost unless APP_URL is https.
-        secure: useSecureCookies(),
+        secure: isHttpsDeployment(),
         sameSite: "lax",
         maxAge: 60 * 60 * 24,
       },
