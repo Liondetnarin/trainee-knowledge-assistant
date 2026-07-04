@@ -15,7 +15,27 @@ function resolveDbPath(): string {
     : path.join(process.cwd(), relative.replace(/^\.\//, ""));
 }
 
+function messagesTableIsPreConversations(sqlite: Database.Database): boolean {
+  const tableExists = sqlite
+    .prepare(`SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'messages'`)
+    .get();
+  if (!tableExists) return false;
+
+  const columns = sqlite.prepare(`PRAGMA table_info(messages)`).all() as Array<{
+    name: string;
+  }>;
+  return !columns.some((column) => column.name === "conversation_id");
+}
+
 function initTables(sqlite: Database.Database): void {
+  // Older deployments (e.g. a pre-existing Docker volume) may have a
+  // "messages" table from before conversations existed — CREATE TABLE IF NOT
+  // EXISTS won't add the new NOT NULL column, so drop and let the schema
+  // below recreate it. There's no production data to preserve here.
+  if (messagesTableIsPreConversations(sqlite)) {
+    sqlite.exec(`DROP TABLE IF EXISTS messages;`);
+  }
+
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
