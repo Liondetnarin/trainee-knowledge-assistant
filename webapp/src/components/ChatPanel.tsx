@@ -56,6 +56,7 @@ export function ChatPanel() {
   const [conversationTotalTokens, setConversationTotalTokens] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   async function fetchConversations(): Promise<ConversationOption[]> {
     const response = await fetch("/api/conversations");
@@ -90,6 +91,7 @@ export function ChatPanel() {
     setErrorHint("");
     setSidebarOpen(false);
     await loadConversationMessages(conversationId);
+    textareaRef.current?.focus();
   }
 
   async function createNewConversation(): Promise<ConversationOption | null> {
@@ -135,6 +137,12 @@ export function ChatPanel() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
+  useEffect(() => {
+    if (!conversationsLoading) {
+      textareaRef.current?.focus();
+    }
+  }, [conversationsLoading]);
+
   async function handleNewChat() {
     const created = await createNewConversation();
     if (!created) return;
@@ -147,6 +155,7 @@ export function ChatPanel() {
     setError("");
     setErrorHint("");
     setSidebarOpen(false);
+    textareaRef.current?.focus();
   }
 
   async function handleDeleteConversation(conversationId: string) {
@@ -172,6 +181,7 @@ export function ChatPanel() {
         setActiveConversationId(created.id);
         setMessages([]);
         setConversationTotalTokens(0);
+        textareaRef.current?.focus();
       }
     }
   }
@@ -196,6 +206,9 @@ export function ChatPanel() {
     setErrorHint("");
     setLoading(true);
     setInput("");
+    // Sending via the button click (not Enter) moves focus onto the button —
+    // bring it back so the user can keep typing the next message right away.
+    textareaRef.current?.focus();
 
     const optimisticUserMessage: ChatMessage = {
       id: `temp-${Date.now()}`,
@@ -515,6 +528,7 @@ export function ChatPanel() {
             ) : null}
 
             <textarea
+              ref={textareaRef}
               id="message"
               rows={3}
               value={input}
@@ -522,7 +536,7 @@ export function ChatPanel() {
               onKeyDown={handleTextareaKeyDown}
               placeholder="Type your question here..."
               className={`${inputClass} resize-none`}
-              disabled={loading}
+              disabled={conversationsLoading}
             />
             <p className="text-xs text-slate-400">
               Press Enter to send, Shift+Enter for a new line.

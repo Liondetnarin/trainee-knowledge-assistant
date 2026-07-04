@@ -20,7 +20,7 @@
 
 ### Deliverables
 - [x] README.md
-- [ ] AI_JOURNAL.md (เป้า 15+ sessions — ตอนนี้ 7)
+- [ ] AI_JOURNAL.md (เป้า 15+ sessions — ตอนนี้ 8)
 - [x] DECISIONS.md (3 decisions)
 
 ### Bonus (ถ้ามีเวลา)
