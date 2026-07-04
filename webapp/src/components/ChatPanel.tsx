@@ -25,6 +25,11 @@ interface ConversationOption {
   updatedAt: string;
 }
 
+interface DocumentOption {
+  id: string;
+  originalName: string;
+}
+
 type ChatStreamEvent =
   | { type: "delta"; text?: string }
   | {
@@ -41,6 +46,7 @@ export function ChatPanel() {
   const [activeConversationId, setActiveConversationId] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [selectedDocumentId, setSelectedDocumentId] = useState("");
+  const [documents, setDocuments] = useState<DocumentOption[]>([]);
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const [errorHint, setErrorHint] = useState("");
@@ -202,7 +208,6 @@ export function ChatPanel() {
 
     const streamingId = `assistant-${Date.now()}`;
     const conversationId = activeConversationId;
-    const isFirstMessage = messages.length === 0;
 
     try {
       const payload: { message: string; documentId?: string; conversationId: string } = {
@@ -318,8 +323,10 @@ export function ChatPanel() {
           );
           setInput(message);
         }
-      } else if (isFirstMessage) {
-        // Server auto-titles the conversation from the first message — refresh the sidebar.
+      } else {
+        // Refresh the sidebar: picks up the auto-generated title on the first
+        // message, and keeps ordering in sync with the server's "most recently
+        // active" sort on every later message.
         const refreshed = await fetchConversations();
         if (refreshed.length > 0) setConversations(refreshed);
       }
@@ -339,6 +346,7 @@ export function ChatPanel() {
   }
 
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
+  const selectedDocument = documents.find((doc) => doc.id === selectedDocumentId);
 
   return (
     <div className="flex h-[calc(100vh-4.25rem)]">
@@ -404,6 +412,7 @@ export function ChatPanel() {
           <DocumentSidebar
             selectedDocumentId={selectedDocumentId}
             onSelectDocument={setSelectedDocumentId}
+            onDocumentsChange={setDocuments}
           />
         </div>
       </aside>
@@ -501,7 +510,7 @@ export function ChatPanel() {
           <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             {selectedDocumentId ? (
               <p className="text-xs text-slate-500">
-                Chatting with document context selected in the sidebar.
+                Chatting with <span className="font-medium">{selectedDocument?.originalName ?? "the selected document"}</span> as context.
               </p>
             ) : null}
 

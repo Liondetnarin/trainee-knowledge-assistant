@@ -13,6 +13,7 @@ interface DocumentItem {
 interface DocumentSidebarProps {
   selectedDocumentId: string;
   onSelectDocument: (id: string) => void;
+  onDocumentsChange?: (documents: DocumentItem[]) => void;
 }
 
 function formatSize(bytes: number): string {
@@ -24,6 +25,7 @@ function formatSize(bytes: number): string {
 export function DocumentSidebar({
   selectedDocumentId,
   onSelectDocument,
+  onDocumentsChange,
 }: DocumentSidebarProps) {
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -37,12 +39,15 @@ export function DocumentSidebar({
 
     const data = (await response.json()) as { documents: DocumentItem[] };
     setDocuments(data.documents);
+    onDocumentsChange?.(data.documents);
   }
 
   useEffect(() => {
     // setState only happens after the awaited fetch — not a synchronous cascade.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadDocuments();
+    // Run once on mount only — loadDocuments always closes over the latest props.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {

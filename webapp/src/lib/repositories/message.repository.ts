@@ -1,4 +1,4 @@
-import { asc, desc, eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { messages } from "@/lib/db/schema";
 
@@ -37,18 +37,6 @@ export async function createMessage(
 
   db.insert(messages).values(record).run();
   return record;
-}
-
-export async function getMessagesByConversationId(
-  conversationId: string,
-): Promise<MessageRecord[]> {
-  const db = getDb();
-  return db
-    .select()
-    .from(messages)
-    .where(eq(messages.conversationId, conversationId))
-    .orderBy(asc(messages.createdAt))
-    .all();
 }
 
 export async function getSessionTokenTotal(userId: string): Promise<number> {
