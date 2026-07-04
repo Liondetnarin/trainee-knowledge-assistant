@@ -31,6 +31,7 @@ export function UploadForm() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [inputKey, setInputKey] = useState(0);
+  const [deletingId, setDeletingId] = useState("");
 
   async function loadDocuments() {
     const response = await fetch("/api/documents");
@@ -41,6 +42,8 @@ export function UploadForm() {
   }
 
   useEffect(() => {
+    // setState only happens after awaited fetches — not a synchronous cascade.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadDocuments();
   }, []);
 
@@ -85,6 +88,36 @@ export function UploadForm() {
       setError("Upload failed. Please try again.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDelete(doc: DocumentItem) {
+    const confirmed = window.confirm(
+      `Delete "${doc.originalName}"? Chat history is kept, but the file and its chunks are removed.`,
+    );
+    if (!confirmed) return;
+
+    setError("");
+    setSuccess("");
+    setDeletingId(doc.id);
+
+    try {
+      const response = await fetch(`/api/documents/${doc.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const data = (await response.json()) as { error?: string };
+        setError(data.error ?? "Failed to delete document");
+        return;
+      }
+
+      setSuccess(`Deleted "${doc.originalName}".`);
+      await loadDocuments();
+    } catch {
+      setError("Failed to delete document. Please try again.");
+    } finally {
+      setDeletingId("");
     }
   }
 
@@ -166,9 +199,19 @@ export function UploadForm() {
                     {formatSize(doc.size)} · {doc.mimeType || "unknown type"}
                   </p>
                 </div>
-                <span className="text-xs text-slate-400">
-                  {new Date(doc.createdAt).toLocaleString()}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-slate-400">
+                    {new Date(doc.createdAt).toLocaleString()}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => void handleDelete(doc)}
+                    disabled={deletingId === doc.id}
+                    className="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+                  >
+                    {deletingId === doc.id ? "Deleting..." : "Delete"}
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

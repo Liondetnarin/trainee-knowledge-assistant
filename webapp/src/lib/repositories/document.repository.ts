@@ -1,6 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
-import { documentChunks, documents } from "@/lib/db/schema";
+import { documentChunks, documents, messages } from "@/lib/db/schema";
 
 export type DocumentRecord = typeof documents.$inferSelect;
 
@@ -65,6 +65,23 @@ export async function findDocumentsByUserId(
     .where(eq(documents.userId, userId))
     .orderBy(desc(documents.createdAt))
     .all();
+}
+
+/**
+ * Removes a document and its chunks. Chat history is kept — messages that
+ * referenced the document just lose the link (documentId set to null).
+ */
+export async function deleteDocumentById(documentId: string): Promise<void> {
+  const db = getDb();
+
+  db.update(messages)
+    .set({ documentId: null })
+    .where(eq(messages.documentId, documentId))
+    .run();
+  db.delete(documentChunks)
+    .where(eq(documentChunks.documentId, documentId))
+    .run();
+  db.delete(documents).where(eq(documents.id, documentId)).run();
 }
 
 export async function getChunkTextsByDocumentId(

@@ -1,10 +1,12 @@
 import { randomUUID } from "crypto";
-import { mkdirSync, writeFileSync, existsSync } from "fs";
+import { mkdirSync, writeFileSync, existsSync, unlinkSync } from "fs";
 import path from "path";
 import { extractPdfText } from "@/lib/pdf/extract-text";
 import { splitText } from "@/lib/chunking";
 import {
   createDocument,
+  deleteDocumentById,
+  findDocumentById,
   saveDocumentChunks,
 } from "@/lib/repositories/document.repository";
 import { sanitizeFilename } from "@/lib/utils/sanitize-filename";
@@ -173,4 +175,37 @@ export async function uploadDocument(
       chunkCount: chunks.length,
     },
   };
+}
+
+export type DeleteResult =
+  | { success: true }
+  | { success: false; error: string; status: number };
+
+export async function deleteDocument(
+  documentId: string,
+  userId: string,
+): Promise<DeleteResult> {
+  const document = await findDocumentById(documentId);
+
+  if (!document || document.userId !== userId) {
+    return { success: false, error: "Document not found", status: 404 };
+  }
+
+  const resolvedPath = path.resolve(document.filePath);
+  const resolvedUploadDir = path.resolve(getUploadDir());
+
+  // Only touch files inside the upload dir; DB row is removed regardless.
+  if (resolvedPath.startsWith(resolvedUploadDir) && existsSync(resolvedPath)) {
+    try {
+      unlinkSync(resolvedPath);
+    } catch (error) {
+      console.error("[upload] failed to delete file from disk", {
+        documentId,
+        error: error instanceof Error ? error.message : error,
+      });
+    }
+  }
+
+  await deleteDocumentById(documentId);
+  return { success: true };
 }
