@@ -14,14 +14,16 @@
 
 | # | Feature | คะแนน | Done | Priority 2 วัน |
 |---|---------|------:|:----:|----------------|
-| A | Markdown rendering | 3 | [ ] | สูง |
-| B | Citation จากเอกสาร | 5 | [ ] | กลาง |
-| C | Streaming response | 3 | [ ] | สูง |
+| A | Markdown rendering | 3 | [x] | สูง |
+| B | Citation จากเอกสาร | 5 | [x] | กลาง |
+| C | Streaming response | 3 | [x] | สูง |
 | D | RAG + Vector DB | 8 | [ ] | ต่ำ (ใช้เวลามาก) |
-| E | Conversation history | 3 | [ ] | กลาง |
-| F | Rate limiting | 3 | [ ] | ต่ำ |
+| E | Conversation history | 3 | [x] | กลาง |
+| F | Rate limiting | 3 | [x] | ต่ำ |
 | G | Docker + Healthcheck | 3 | [x] | สูง (ทำตั้งแต่แรก) |
 | H | Unit tests ≥40% | 5 | [ ] | ต่ำ |
+
+> รวม bonus ที่ทำแล้ว 20/20 (แตะ cap พอดี) — D และ H ยังไม่ทำ ถ้าจะเพิ่มคะแนนต้องไปแทนที่ตัวใดตัวหนึ่งที่ทำแล้ว หรือยอมรับว่าเกิน cap ไม่ได้คะแนนเพิ่ม
 
 ## Code Quality (15 คะแนน)
 
@@ -35,7 +37,7 @@
 
 | ไฟล์ | Done |
 |------|:----:|
-| README.md | [ ] |
-| AI_JOURNAL.md (15+ sessions) | [ ] |
-| DECISIONS.md (3 decisions) | [ ] |
-| docker compose up รันได้ | [ ] |
+| README.md | [x] |
+| AI_JOURNAL.md (15+ sessions) | [ ] (ตอนนี้ 5) |
+| DECISIONS.md (3 decisions) | [x] |
+| docker compose up รันได้ | [x] |

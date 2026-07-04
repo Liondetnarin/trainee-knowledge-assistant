@@ -16,17 +16,19 @@
 ### Infrastructure
 - [x] `docker compose up` รันได้
 - [x] `/api/health` healthcheck
-- [ ] Git ≥10 commits แยก feature
+- [ ] Git ≥10 commits แยก feature (ต้องจัด commit งาน refactor รอบนี้ให้เป็นก้อนตาม feature)
 
 ### Deliverables
-- [ ] README.md
-- [ ] AI_JOURNAL.md (เป้า 15+ sessions)
-- [ ] DECISIONS.md (3 decisions)
+- [x] README.md
+- [ ] AI_JOURNAL.md (เป้า 15+ sessions — ตอนนี้ 5)
+- [x] DECISIONS.md (3 decisions)
 
 ### Bonus (ถ้ามีเวลา)
-- [ ] Streaming
-- [ ] Markdown rendering
-- [ ] Conversation history
+- [x] Streaming
+- [x] Markdown rendering
+- [x] Conversation history (multi-conversation sidebar — create/switch/delete)
+- [x] Citation (แสดง source chunk ที่ใช้ตอบ)
+- [x] Rate limiting (per-user, 20 req/min)
 
 ---
 
