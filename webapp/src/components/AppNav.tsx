@@ -21,7 +21,7 @@ export function AppNav() {
 
   return (
     <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+      <div className="mx-auto flex max-w-7xl items-center justify-between py-3 sm:px-6">
         <div className="flex min-w-0 items-center gap-4 sm:gap-8">
           <div className="min-w-0">
             <p className="truncate text-base font-semibold text-slate-900">
