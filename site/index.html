@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trainee Knowledge Assistant - Junior Dev Assessment</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%3E%3Crect%20x='1'%20y='1'%20width='14'%20height='14'%20rx='3'%20fill='%230e7a5f'/%3E%3Cpath%20d='M4.5%208.5l2.5%202.5%204.5-5'%20stroke='white'%20stroke-width='2'%20fill='none'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+<nav class="top" aria-label="เมนูหลัก">
+  <a href="index.html" aria-current="page">Overview</a>
+  <a href="part1.html">Part 1 - Coding</a>
+  <a href="part2.html">Part 2 - Video</a>
+  <a href="part3.html">Part 3 - Leadership</a>
+  <a href="part4.html">Part 4 - Legacy</a>
+</nav>
+
+<p class="kicker">Trainee Knowledge Assistant</p>
+<h1>เดชนรินทร์ ไชยอักษร</h1>
+<p class="lead">งานส่งทั้ง 4 Parts - เว็บแอป (Next.js + AI), วิดีโอ business scenario, แผน onboard trainee และแนวคิดต่อ legacy system - รวมอยู่ในหน้าเดียวเพื่อให้อ่านง่าย</p>
+
+<div class="part-grid">
+  <a class="part-card" href="part1.html">
+    <div class="pc-title">Part 1 - Coding Task</div>
+    <div class="pc-desc">Mini Knowledge Assistant: login, upload PDF/TXT, chat กับ AI ด้วย context จากเอกสาร, token counter - พร้อมวิธี install &amp; setup ด้วย docker compose คำสั่งเดียว</div>
+  </a>
+  <a class="part-card" href="part2.html">
+    <div class="pc-title">Part 2 - Business Scenario Video</div>
+    <div class="pc-desc">วิดีโอ 3 นาที รับมือลูกค้าที่โกรธตอน demo - ดูได้ในหน้าเว็บเลย พร้อมโครงเนื้อหาที่ใช้</div>
+  </a>
+  <a class="part-card" href="part3.html">
+    <div class="pc-title">Part 3 - Leadership Reflection</div>
+    <div class="pc-desc">แผน onboard Trainee 5 คนตลอด 4 เดือน - week-by-week, KPI ที่วัดได้, วิธีจัดการ low performer และ Plan B</div>
+  </a>
+  <a class="part-card" href="part4.html">
+    <div class="pc-title">Part 4 - Legacy System Thinking</div>
+    <div class="pc-desc">3 วันแรกกับระบบเก่า 10 ปีที่ไม่มีเอกสาร และการตัดสินใจเมื่อเจอไฟล์ .php แปลกใน server</div>
+  </a>
+</div>
+
+<h2>Quick Start (Part 1)</h2>
+<pre><code>git clone https://github.com/Liondetnarin/trainee-knowledge-assistant.git
+cd trainee-knowledge-assistant
+cp .env.example .env   # ใส่ AI_PROVIDER, AI_API_KEY, AI_MODEL
+docker compose up</code></pre>
+<p>เปิด <code>http://localhost:3000</code></p>
+<p>username: <code>admin1</code> ... <code>admin4</code>
+<p>password: <code>admin123</code></p>
+
+<h2>เอกสารประกอบใน Repository</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ไฟล์</th><th>เนื้อหา</th></tr></thead>
+  <tbody>
+    <tr><td><a href="../README.md">README.md</a></td><td>ภาพรวม tech stack, setup, features, architecture</td></tr>
+    <tr><td><a href="../AI_JOURNAL.md">AI_JOURNAL.md</a></td><td>บันทึกการใช้ AI 15 sessions - Prompt / Response / My Adjustment</td></tr>
+    <tr><td><a href="../DECISIONS.md">DECISIONS.md</a></td><td>3 architecture decisions พร้อมทางเลือกและ trade-offs</td></tr>
+    <tr><td><a href="../docs/part-3-mine.md">docs/part-3-mine.md</a> · <a href="../docs/part-4-mine.md">part-4-mine.md</a></td><td>draft ลายมือความคิดตัวเองก่อนเรียบเรียง - หลักฐานกระบวนการคิด</td></tr>
+  </tbody>
+</table>
+</div>
+
+<footer>Junior Dev Assessment 2026 · repo: <a href="https://github.com/Liondetnarin/trainee-knowledge-assistant">Liondetnarin/trainee-knowledge-assistant</a></footer>
+</div>
+</body>
+</html>

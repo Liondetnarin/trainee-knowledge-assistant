@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Part 1 - Coding Task · Trainee Knowledge Assistant</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%3E%3Crect%20x='1'%20y='1'%20width='14'%20height='14'%20rx='3'%20fill='%230e7a5f'/%3E%3Cpath%20d='M4.5%208.5l2.5%202.5%204.5-5'%20stroke='white'%20stroke-width='2'%20fill='none'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+<nav class="top" aria-label="เมนูหลัก">
+  <a href="index.html">Overview</a>
+  <a href="part1.html" aria-current="page">Part 1 - Coding</a>
+  <a href="part2.html">Part 2 - Video</a>
+  <a href="part3.html">Part 3 - Leadership</a>
+  <a href="part4.html">Part 4 - Legacy</a>
+</nav>
+
+<p class="kicker">Part 1 · Coding Task · 65 คะแนน</p>
+<h1>Mini Knowledge Assistant</h1>
+<p class="lead">เว็บแอป "คุยกับเอกสารของคุณ" - login, อัปโหลด PDF/TXT แล้วถาม AI เกี่ยวกับเนื้อหาในเอกสาร พร้อมประวัติแชทหลายห้องแบบ ChatGPT และตัวนับ token usage แบบ real-time</p>
+
+<h2>Install &amp; Setup</h2>
+
+<h3>วิธี Docker (คำสั่งเดียว)</h3>
+<pre><code>git clone https://github.com/Liondetnarin/trainee-knowledge-assistant.git
+cd trainee-knowledge-assistant
+cp .env.example .env
+# แก้ .env: ตั้งค่า AI_PROVIDER, AI_API_KEY, AI_MODEL (ดู comment ใน .env.example)
+docker compose up</code></pre>
+<p>แอปรันที่ <code>http://localhost:3000</code> - ข้อมูล (SQLite + ไฟล์ที่อัปโหลด) เก็บใน Docker named volume ไม่หายเมื่อ restart · healthcheck ที่ <code>GET /api/health</code></p>
+
+<h3>บัญชีสำหรับ demo</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Username</th><th>Password</th></tr></thead>
+  <tbody><tr><td><code>admin1</code> … <code>admin4</code></td><td><code>admin123</code></td></tr></tbody>
+</table>
+</div>
+<p class="muted">seed อัตโนมัติตอนรันครั้งแรก - 4 บัญชีเพื่อ demo การแยกข้อมูลรายผู้ใช้ (แต่ละคนเห็นเฉพาะบทสนทนาและเอกสารของตัวเอง)</p>
+
+<h2>Tech Stack</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Layer</th><th>ตัวเลือกที่ใช้</th></tr></thead>
+  <tbody>
+    <tr><td>Framework</td><td>Next.js 16 (App Router) + TypeScript</td></tr>
+    <tr><td>Database</td><td>SQLite (file-based) ผ่าน Drizzle ORM</td></tr>
+    <tr><td>Vector DB</td><td>ไม่ใช้ - keyword-scored chunking แทน (ดู Known Issues)</td></tr>
+    <tr><td>Auth</td><td>iron-session (httpOnly cookie) + bcrypt</td></tr>
+    <tr><td>AI provider</td><td>OpenAI-compatible - สลับ Groq / Gemini / OpenAI / Anthropic ผ่าน env</td></tr>
+    <tr><td>Styling</td><td>Tailwind CSS v4 · Markdown ด้วย react-markdown + remark-gfm</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>Features</h2>
+<h3>Required (ครบ 5 ข้อ)</h3>
+<ul class="checklist">
+  <li>Login + Protected Routes (bcrypt + iron-session, กันด้วย middleware)</li>
+  <li>Upload PDF/TXT (validate type/size, sanitize ชื่อไฟล์, กัน path traversal)</li>
+  <li>Chat with AI (streaming, timeout, error handling พร้อม hint บอกวิธีแก้)</li>
+  <li>Chat with Uploaded File Context (chunked retrieval, ถาม-ตอบรายเอกสาร)</li>
+  <li>Token Usage Counter (ต่อข้อความ, ต่อบทสนทนา, รวมต่อผู้ใช้)</li>
+</ul>
+<h3>Bonus</h3>
+<ul class="checklist">
+  <li>Streaming responses (Server-Sent Events แบบ token-by-token)</li>
+  <li>Markdown rendering ในคำตอบ AI</li>
+  <li>ประวัติแชทหลายห้อง (sidebar แบบ ChatGPT - สร้าง/สลับ/ลบ)</li>
+  <li>Citation - คำตอบแสดงว่าใช้ chunk ไหนของเอกสารไหน</li>
+  <li>Rate limiting (ต่อผู้ใช้, 20 requests/นาที ที่ /api/chat)</li>
+  <li>Docker Compose + healthcheck</li>
+  <li class="no">RAG ด้วย vector DB จริง - ไม่ทำ โดยตั้งใจ (ดูเหตุผลใน DECISIONS.md)</li>
+  <li class="no">Unit tests - ยังไม่ได้ตั้ง test runner</li>
+</ul>
+
+<h2>Architecture</h2>
+<pre><code>[Login] → iron-session cookie → middleware คุ้มครอง /chat, /upload, /api/*
+
+[Upload PDF/TXT]
+  → validate (type/size/ไม่ว่าง) → sanitize ชื่อไฟล์ → บันทึกลง disk
+  → ดึงข้อความ (pdf-parse หรือ raw utf-8) → chunk (~800 ตัวอักษร, overlap 100)
+  → เก็บ chunks ลง SQLite
+
+[Chat]
+  → เลือก/สร้างบทสนทนา (sidebar) → เลือกเอกสารได้ (ไม่บังคับ)
+  → ดึง chunks 3 อันดับแรกที่ keyword ตรงกับคำถามมากที่สุด
+  → ประกอบ system prompt → ส่งประวัติแชท + คำถาม
+  → stream คำตอบกลับผ่าน SSE → บันทึกข้อความ + token usage + citation</code></pre>
+<p><strong>Layering:</strong> <code>app/api/**/route.ts</code> (HTTP เท่านั้น) → <code>lib/services/**</code> (business logic) → <code>lib/repositories/**</code> (DB) → <code>lib/**</code> (utils กลาง)</p>
+
+<h2>Known Issues (เขียนไว้ตรง ๆ)</h2>
+<ul>
+  <li><strong>Chunking เป็น keyword-based ไม่ใช่ semantic</strong> - ดีกับคำถามข้อเท็จจริงตรง ๆ อ่อนกับคำถาม paraphrase - เหตุผลและแนวทาง upgrade อยู่ใน DECISIONS.md</li>
+  <li><strong>Rate limiting เป็น in-memory instance เดียว</strong> - deploy จริงหลายเครื่องต้องใช้ Redis</li>
+  <li><strong>Citation บอกระดับ chunk</strong> ไม่ใช่ประโยคเป๊ะ ๆ</li>
+  <li><strong>บัญชี mock ใช้รหัสผ่านเดียวกัน</strong> - เหมาะกับ demo เท่านั้น</li>
+</ul>
+
+<footer><a href="index.html">← Overview</a> · <a href="part2.html">Part 2 - Video →</a></footer>
+</div>
+</body>
+</html>

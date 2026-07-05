@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Part 4 - Legacy System Thinking · Trainee Knowledge Assistant</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%3E%3Crect%20x='1'%20y='1'%20width='14'%20height='14'%20rx='3'%20fill='%230e7a5f'/%3E%3Cpath%20d='M4.5%208.5l2.5%202.5%204.5-5'%20stroke='white'%20stroke-width='2'%20fill='none'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+<nav class="top" aria-label="เมนูหลัก">
+  <a href="index.html">Overview</a>
+  <a href="part1.html">Part 1 - Coding</a>
+  <a href="part2.html">Part 2 - Video</a>
+  <a href="part3.html">Part 3 - Leadership</a>
+  <a href="part4.html" aria-current="page">Part 4 - Legacy</a>
+</nav>
+
+<p class="kicker">Part 4 · Legacy System Thinking · 20 คะแนน</p>
+<h1>เริ่มยังไงกับระบบเก่า 10 ปีที่ไม่มีใครเข้าใจ</h1>
+<p class="lead">Scenario: เว็บลูกค้าอายุ 10 ปี ทีม dev เดิมลาออกหมด ไม่มีเอกสาร ไม่มี test - ลูกค้ามี 3 เรื่อง: เว็บช้า, เจอไฟล์แปลกใน server, อยาก deploy feature ใหม่แต่ไม่มีใครกล้า · มีเวลา 2 สัปดาห์ทำ discovery · ต้นฉบับ: <a href="../docs/part-4-legacy.md">docs/part-4-legacy.md</a></p>
+
+<h2>คำถามที่ 1: 3 วันแรกจะทำอะไร</h2>
+
+<h3>ลำดับ priority</h3>
+<p>ผมไม่เคยเจอ legacy system แบบนี้ตรง ๆ มาก่อนครับ เคยแต่นึกภาพว่าถ้าเจอจะเป็นยังไง เพราะงั้นแนวทางของผมจะเน้นความระมัดระวังเป็นหลัก ไม่รีบ - จำแนกก่อนเสมอว่าอะไรเสี่ยงกระทบ prod มาก/น้อย ก่อนตัดสินใจลงมือ</p>
+
+<h3>Day 1–3</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>วัน</th><th>สิ่งที่ทำ</th></tr></thead>
+  <tbody>
+    <tr><td>Day 1</td><td>ศึกษาข้อมูลก่อน - อ่าน docs ของงานที่ใกล้เคียงกันเท่าที่มี, จำแนกว่าอะไรกระทบ prod เสี่ยงมาก/น้อย พร้อม <strong>backup ข้อมูลไว้ก่อนเสมอ</strong> เพื่อไม่ให้เกิดความเสี่ยงต่อข้อมูลและผู้ใช้งานที่ใช้อยู่จริง</td></tr>
+    <tr><td>Day 2</td><td>ใช้ AI ช่วยอ่าน/สรุปว่าระบบคืออะไร มีอะไรที่จับต้องได้โดยไม่เสี่ยง ไม่กระทบ prod หรือ user บ้าง พร้อมจดบันทึกเป็น step อย่างมีระบบ เพื่อให้ทำงานต่อไปได้ถูกทาง</td></tr>
+    <tr><td>Day 3</td><td>พอรู้ความเสี่ยงและ backup แล้ว เริ่ม debug ปัญหาจริง (เช่นความช้า) รายงานผลเพื่อหาแนวทางแก้ไขที่ตรงกับที่ลูกค้าต้องการ</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>ใช้ AI ยังไง</h3>
+<pre><code>Prompt 1: "นี่คือ error log จาก server เก่า [แปะ log] ช่วยดูให้หน่อยว่ามี pattern
+อะไรที่บ่งชี้ว่าเว็บช้าเพราะอะไรได้บ้าง"
+
+Prompt 2: "ช่วย list checklist สิ่งที่ควรเช็คก่อนแตะ production server
+ที่ไม่มีเอกสารเลย เพื่อไม่ให้พังระหว่างสำรวจ"
+
+Prompt 3: "ถ้าต้องการ deploy feature ใหม่ สามารถทำได้อย่างไร
+เพื่อไม่ให้เกิดผลกระทบต่อลูกค้าที่ใช้งานอยู่ใน server"</code></pre>
+
+<h3>ถ้าไม่รู้ จะถามใคร</h3>
+<p>พี่ในทีมที่ส่งงานมาให้ - เรื่อง context ธุรกิจและประวัติปัญหาเก่า ๆ, sysadmin ที่ดูแล infra - เรื่องสิทธิ์เข้าถึงและ deploy process เดิม, และถ้ายังไม่ชัดจะลองถามกลุ่ม/platform ที่เจอเหตุการณ์ใกล้เคียงกันมาก่อน ควบคู่กับถาม AI</p>
+
+<h3>เรื่องที่กังวล</h3>
+<p>กลัวว่าแค่สำรวจเฉย ๆ ก็ดันไป trigger อะไรที่กระทบ prod เพราะไม่เคยเจอระบบแบบนี้ตรง ๆ มาก่อน เลยอยากทำทุกอย่างที่เป็น read-only ให้มากที่สุดในช่วงแรก ค่อยขยับไปทำอะไรที่เสี่ยงขึ้นทีหลัง</p>
+
+<h3>จบ 3 วัน deliver อะไร</h3>
+<p>Discovery doc สั้น ๆ (architecture เท่าที่เข้าใจ, root cause เบื้องต้นของความช้า, risk list, คำถามที่ยังไม่มีคำตอบ) พร้อมเสนอลำดับความสำคัญของงานสัปดาห์ถัดไป - ถ้า 3 วันไม่พอให้สรุปชัด จะขอเวลาเพิ่มอีก 2-3 วันแทนที่จะรีบสรุปแบบเดา ๆ</p>
+
+<h2>คำถามที่ 2: ไฟล์ .php obfuscate ใน folder images/</h2>
+
+<h3>คิดว่าคืออะไร</h3>
+<p>ไม่แน่ใจเลยจริง ๆ ครับ ไฟล์ .php ที่อยู่ใน <code>images/</code> ปกติมักเป็นไฟล์สำหรับจัดการรูปภาพ (อัปโหลด/resize) แต่ก็อาจเป็นโค้ดที่แฮกเกอร์ฝังไว้ (malware) ถ้าไม่ใช่คนที่ทีมสร้างขึ้นเอง อาจเป็นได้ทั้งสองแบบ ยังฟันธงไม่ได้ด้วยข้อมูลเท่าที่มีตอนนี้</p>
+
+<h3>คำถามก่อนตัดสินใจ</h3>
+<ul>
+  <li>มี log ไหมว่าไฟล์นี้เคยถูกเรียกใช้งานจริงบ้าง ล่าสุดเมื่อไหร่</li>
+  <li>ฟีเจอร์ในระบบ (เช่น upload รูป) เคยเรียกใช้ไฟล์นี้จริงหรือเปล่า</li>
+</ul>
+
+<h3>จะทำอย่างไร (ลบ / เก็บ / อื่น ๆ)</h3>
+<p>ยังไม่ลบครับ - ถ้าเป็นไฟล์จัดการรูปภาพจริง การลบอาจกระทบ prod (ฟีเจอร์พัง) แต่ถ้าเป็น malware การลบทันทีจะเสียหลักฐานที่ใช้สืบต่อได้ ดังนั้นจะ quarantine ไฟล์ไว้ก่อน (ย้ายออกจาก path ที่ execute ได้ หรือ backup แยกต่างหาก) และไม่รันไฟล์นี้บน prod เด็ดขาดไม่ว่าจะเป็นแบบไหน</p>
+
+<h3>อะไรต้องเช็คเพิ่ม</h3>
+<ul>
+  <li>Server log ว่ามีการเข้าถึงไฟล์นี้จาก IP แปลก ๆ ไหม</li>
+  <li>ไฟล์อื่นในโฟลเดอร์เดียวกันที่ modify time ใกล้เคียงกัน</li>
+  <li>สิทธิ์ของโฟลเดอร์ <code>images/</code> ว่าอนุญาตให้ execute PHP ได้จริงไหม (ถ้าใช่ นั่นคือสัญญาณอันตราย)</li>
+</ul>
+
+<h3>ใครควรรู้</h3>
+<p>พี่ในทีมที่ส่งงานมาให้ก่อน แล้วถ้าข้อมูลชี้ไปทางเรื่องความปลอดภัยจริง ต้องแจ้งขึ้นไปอีกระดับ (security/lead) และอาจต้องแจ้งลูกค้าด้วย เพราะกระทบความปลอดภัยของระบบที่ยังมีคนใช้งานอยู่จริง</p>
+
+<h2>AI Journal สั้น ๆ (Part 4)</h2>
+<div class="card">
+  <p><strong>Session 1 - checklist ก่อนแตะ production</strong><br>
+  <span class="muted">Prompt:</span> "ช่วย list checklist สิ่งที่ควรเช็คก่อนแตะ production server ที่ไม่มีเอกสารเลย"<br>
+  <span class="muted">AI ตอบ:</span> แนะนำให้ backup/snapshot, เช็ค log, เช็คสิทธิ์เข้าถึงก่อนเสมอ<br>
+  <span class="muted">ปรับเอง:</span> เพิ่มขั้นตอนจำแนกความเสี่ยงมาก/น้อยก่อน backup เพราะ AI ไม่รู้ context ว่า server ไหนกระทบ user จริงมากกว่ากัน ต้องคิดเองว่าจะ priority ตัวไหนก่อน</p>
+</div>
+<div class="card">
+  <p><strong>Session 2 - ไฟล์ .php obfuscate</strong><br>
+  <span class="muted">Prompt:</span> "เจอไฟล์ .php obfuscate ใน images/ ควรทำยังไง"<br>
+  <span class="muted">AI ตอบ:</span> บอกว่าอาจเป็น malware แนะนำให้ scan และไม่รันไฟล์<br>
+  <span class="muted">ปรับเอง:</span> เพิ่มมุมว่าไฟล์ใน <code>images/</code> อาจเป็นไฟล์จัดการรูปปกติด้วย ไม่ใช่ malware เสมอไป เพราะ AI ตอบเอียงไปทาง security ฝ่ายเดียว โดยไม่ได้คิดถึงความเป็นไปได้ที่จะเป็น false positive</p>
+</div>
+
+<footer><a href="part3.html">← Part 3 - Leadership</a> · <a href="index.html">Overview →</a></footer>
+</div>
+</body>
+</html>

@@ -61,6 +61,7 @@ Browser → Next.js App Router
 
 ## Related Documents
 
+- **[site/index.html](./site/index.html) — หน้ารวมงานทั้ง 4 Parts อ่านง่าย (เปิดในเบราว์เซอร์หลัง clone หรือดูออนไลน์ผ่าน GitHub Pages)**
 - [docs/assignment-spec.md](./docs/assignment-spec.md) — เอกสารต้นฉบับโจทย์
 - [AI_JOURNAL.md](./AI_JOURNAL.md)
 - [DECISIONS.md](./DECISIONS.md)
