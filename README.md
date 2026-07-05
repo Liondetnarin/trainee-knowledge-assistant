@@ -19,7 +19,7 @@ Mini Knowledge Assistant — Junior Dev Assessment Part 1
 ```bash
 # 1. Copy env
 cp .env.example .env
-# แก้ AI_API_KEY และ SESSION_SECRET
+# แก้ AI_API_KEY อย่างเดียวพอ — SESSION_SECRET ค่า default ใช้ทดสอบ local ได้เลย
 
 # 2. Run
 docker compose up --build
