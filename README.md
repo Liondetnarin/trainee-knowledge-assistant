@@ -1,6 +1,6 @@
 # Knowledge Assistant
 
-Mini Knowledge Assistant — Junior Dev Assessment Part 1
+Mini Knowledge Assistant - Junior Dev Assessment Part 1
 
 ## Tech Stack
 
@@ -19,7 +19,7 @@ Mini Knowledge Assistant — Junior Dev Assessment Part 1
 ```bash
 # 1. Copy env
 cp .env.example .env
-# แก้ AI_API_KEY อย่างเดียวพอ — SESSION_SECRET ค่า default ใช้ทดสอบ local ได้เลย
+# แก้ AI_API_KEY อย่างเดียวพอ - SESSION_SECRET ค่า default ใช้ทดสอบ local ได้เลย
 
 # 2. Run
 docker compose up --build
@@ -27,7 +27,7 @@ docker compose up --build
 
 เปิด http://localhost:3000
 
-**Mock users:** `admin1` … `admin4` / `admin123` (seed อัตโนมัติตอนรันครั้งแรก — แยกข้อมูลรายผู้ใช้)
+**Mock users:** `admin1` … `admin4` / `admin123` (seed อัตโนมัติตอนรันครั้งแรก - แยกข้อมูลรายผู้ใช้)
 
 ## Features Done
 
@@ -45,7 +45,7 @@ docker compose up --build
 - [x] Citation (แสดง source chunk ที่ใช้ตอบ)
 - [x] Conversation history (multi-conversation sidebar)
 - [x] Rate limiting (per-user, 20 req/min)
-- [ ] RAG with Vector DB (ใช้ simple chunking แทน — ดู Known Issues)
+- [ ] RAG with Vector DB (ใช้ simple chunking แทน - ดู Known Issues)
 
 ## Architecture
 
@@ -61,18 +61,18 @@ Browser → Next.js App Router
 
 ## Related Documents
 
-- **[site/index.html](./site/index.html) — หน้ารวมงานทั้ง 4 Parts อ่านง่าย (เปิดในเบราว์เซอร์หลัง clone หรือดูออนไลน์ผ่าน GitHub Pages)**
-- [docs/assignment-spec.md](./docs/assignment-spec.md) — เอกสารต้นฉบับโจทย์
+- **[site/index.html](./site/index.html) - หน้ารวมงานทั้ง 4 Parts อ่านง่าย (เปิดในเบราว์เซอร์หลัง clone หรือดูออนไลน์ผ่าน GitHub Pages)**
+- [docs/assignment-spec.md](./docs/assignment-spec.md) - เอกสารต้นฉบับโจทย์
 - [AI_JOURNAL.md](./AI_JOURNAL.md)
 - [DECISIONS.md](./DECISIONS.md)
 - [TASK.md](./TASK.md)
-- **Part 2 — Video:** _https://youtu.be/5LivhZ2IVhI?si=hDSD-iXKKdGo6E2U_ ([bullet notes](./docs/part-2-video-notes.md))
-- **Part 3 — Leadership:** [docs/part-3-leadership.md](./docs/part-3-leadership.md)
-- **Part 4 — Legacy Thinking:** [docs/part-4-legacy.md](./docs/part-4-legacy.md)
+- **Part 2 - Video:** _https://youtu.be/5LivhZ2IVhI?si=hDSD-iXKKdGo6E2U_ ([bullet notes](./docs/part-2-video-notes.md))
+- **Part 3 - Leadership:** [docs/part-3-leadership.md](./docs/part-3-leadership.md)
+- **Part 4 - Legacy Thinking:** [docs/part-4-legacy.md](./docs/part-4-legacy.md)
 
 ## Known Issues
 
-- File context ใช้ simple chunking ไม่ใช่ Vector DB — ความแม่นยำจำกัด
+- File context ใช้ simple chunking ไม่ใช่ Vector DB - ความแม่นยำจำกัด
 - _(เพิ่มเมื่อพบ issue อื่น)_
 
 ## Template / Boilerplate
