@@ -1,10 +1,10 @@
 # Knowledge Assistant
 
-เว็บแอป "คุยกับเอกสารของคุณ" ขนาดเล็ก — login, อัปโหลด PDF/TXT แล้วถาม AI
+เว็บแอป "คุยกับเอกสารของคุณ" ขนาดเล็ก - login, อัปโหลด PDF/TXT แล้วถาม AI
 เกี่ยวกับเนื้อหาในเอกสารได้ พร้อมประวัติแชทหลายห้องแบบ ChatGPT และตัวนับ
 token usage แบบ real-time
 
-ทำขึ้นสำหรับ Junior Dev Assessment (Part 1 — Coding Task) — ดู
+ทำขึ้นสำหรับ Junior Dev Assessment (Part 1 - Coding Task) - ดู
 `AI_JOURNAL.md`, `DECISIONS.md` และ `TASK.md` ที่ root ของ repo
 
 ## Tech Stack
@@ -13,16 +13,16 @@ token usage แบบ real-time
 |---|---|
 | Framework | Next.js 16 (App Router) + TypeScript |
 | Database | SQLite (file-based) ผ่าน Drizzle ORM |
-| Vector DB | ไม่ใช้ — ใช้ keyword-scored chunking แทน (ดู Known Issues) |
+| Vector DB | ไม่ใช้ - ใช้ keyword-scored chunking แทน (ดู Known Issues) |
 | Auth | iron-session (httpOnly cookie) + bcrypt hash รหัสผ่าน |
-| AI provider | OpenAI-compatible chat completions — สลับได้ระหว่าง Groq, Gemini, OpenAI, Anthropic ผ่าน env |
+| AI provider | OpenAI-compatible chat completions - สลับได้ระหว่าง Groq, Gemini, OpenAI, Anthropic ผ่าน env |
 | PDF parsing | `pdf-parse` |
 | Styling | Tailwind CSS v4 |
 | Markdown rendering | `react-markdown` + `remark-gfm` |
 
 ## Setup & Run
 
-### วิธี A — Docker (คำสั่งเดียว)
+### วิธี A - Docker (คำสั่งเดียว)
 
 ```bash
 cp .env.example .env
@@ -30,19 +30,8 @@ cp .env.example .env
 docker compose up
 ```
 
-แอปรันที่ http://localhost:3000 — ข้อมูล (SQLite + ไฟล์ที่อัปโหลด) เก็บใน
+แอปรันที่ http://localhost:3000 - ข้อมูล (SQLite + ไฟล์ที่อัปโหลด) เก็บใน
 Docker named volume ไม่หายเมื่อ restart
-
-### วิธี B — รัน dev ในเครื่อง
-
-```bash
-cd webapp
-npm install
-cp ../.env.example ../.env   # แล้วแก้ ../.env ใส่ AI key ของคุณ
-npm run dev
-```
-
-แอปรันที่ http://localhost:3000 (อ่าน `.env` จาก root ของ repo)
 
 ### บัญชีสำหรับ demo
 
@@ -63,11 +52,11 @@ npm run dev
 - [x] Docker Compose + healthcheck (`GET /api/health`)
 - [x] Streaming responses (Server-Sent Events แบบ token-by-token)
 - [x] Markdown rendering ในคำตอบ AI
-- [x] ประวัติแชทหลายห้อง (sidebar แบบ ChatGPT — สร้าง/สลับ/ลบแชทได้)
+- [x] ประวัติแชทหลายห้อง (sidebar แบบ ChatGPT - สร้าง/สลับ/ลบแชทได้)
 - [x] Citation (คำตอบแสดงว่าใช้ chunk ไหนของเอกสารไหนตอบ)
 - [x] Rate limiting (ต่อผู้ใช้, in-memory, 20 requests/นาที ที่ `/api/chat`)
-- [ ] RAG ด้วย vector DB จริง (ยังไม่ทำ — ดู Known Issues)
-- [ ] Unit tests (ยังไม่ทำ — ยังไม่ได้ตั้ง test runner)
+- [ ] RAG ด้วย vector DB จริง (ยังไม่ทำ - ดู Known Issues)
+- [ ] Unit tests (ยังไม่ทำ - ยังไม่ได้ตั้ง test runner)
 
 ## Architecture
 
@@ -95,23 +84,23 @@ rate limiting, session)
 
 **Data model**: `users` → `conversations` → `messages` (แต่ละ message
 ผูกกับ `documents` ได้เพื่อทำ citation); `documents` → `document_chunks`
-เอกสาร scope ที่ระดับ user ไม่ใช่ต่อบทสนทนา — ทุกแชทของ user เดียวกัน
+เอกสาร scope ที่ระดับ user ไม่ใช่ต่อบทสนทนา - ทุกแชทของ user เดียวกัน
 เลือกใช้เอกสารที่เคยอัปโหลดไว้ได้เลยโดยไม่ต้องอัปโหลดซ้ำ
 
 ## Known Issues
 
-- **Chunking เป็น keyword-based ไม่ใช่ semantic** — retrieval ให้คะแนน chunk
+- **Chunking เป็น keyword-based ไม่ใช่ semantic** - retrieval ให้คะแนน chunk
   จากจำนวนคำที่ตรงกับคำถามตรง ๆ ไม่มี embeddings/vector DB ใช้ได้ดีกับคำถาม
   เชิงข้อเท็จจริงบนเอกสารขนาดเล็ก-กลาง แต่จะอ่อนกับคำถามที่ paraphrase
-  หรือคำตอบที่ต้องเชื่อมหลาย chunk ที่อยู่ห่างกัน — ดูเหตุผลและแนวทาง upgrade
+  หรือคำตอบที่ต้องเชื่อมหลาย chunk ที่อยู่ห่างกัน - ดูเหตุผลและแนวทาง upgrade
   เป็น RAG จริงใน `DECISIONS.md` (Decision 2)
-- **Rate limiting เป็น in-memory instance เดียว** — พอสำหรับงานนี้
-  (container เดียว) แต่ reset เมื่อ restart และไม่แชร์ state ข้ามหลาย instance —
+- **Rate limiting เป็น in-memory instance เดียว** - พอสำหรับงานนี้
+  (container เดียว) แต่ reset เมื่อ restart และไม่แชร์ state ข้ามหลาย instance -
   ถ้า deploy จริงหลายเครื่องต้องใช้ Redis
-- **ยังไม่มี automated tests** — ตรวจด้วยมือ + `curl` smoke test ครบทุก
+- **ยังไม่มี automated tests** - ตรวจด้วยมือ + `curl` smoke test ครบทุก
   API route แต่ยังไม่ได้ตั้ง test runner
-- **Citation บอกระดับ chunk ไม่ใช่ประโยคเป๊ะ ๆ** — บอกว่าใช้ chunk ไหนของ
-  เอกสารไหน ไม่ได้ชี้ประโยคที่ยกมา — พอสำหรับ verify คำตอบ แต่ยังไม่ใช่ระบบ
+- **Citation บอกระดับ chunk ไม่ใช่ประโยคเป๊ะ ๆ** - บอกว่าใช้ chunk ไหนของ
+  เอกสารไหน ไม่ได้ชี้ประโยคที่ยกมา - พอสำหรับ verify คำตอบ แต่ยังไม่ใช่ระบบ
   inline-quote citation เต็มรูปแบบ
-- **บัญชี mock ใช้รหัสผ่านเดียวกัน** — `admin1`–`admin4` ใช้ `admin123`
-  เหมือนกันหมด — เหมาะกับ demo ในเครื่อง ไม่ใช่วิธี provision บัญชีจริง
+- **บัญชี mock ใช้รหัสผ่านเดียวกัน** - `admin1`–`admin4` ใช้ `admin123`
+  เหมือนกันหมด - เหมาะกับ demo ในเครื่อง ไม่ใช่วิธี provision บัญชีจริง
