@@ -28,4 +28,4 @@
 - [ ] Goodwill: extended support / training session สั้น ๆ
 
 ## Link วิดีโอ (หลังอัด)
-- URL: _ใส่หลัง upload_
+- URL: https://youtu.be/5LivhZ2IVhI?si=hDSD-iXKKdGo6E2U
